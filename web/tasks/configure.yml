@@ -1,0 +1,10 @@
+---
+  - name: apache.conf file
+    copy: src=apache2.conf dest=/etc/apache2/
+    become: true
+    notify:
+             - restart apache2 service
+    
+  - name: send copy.html file
+    copy: src=copy.html dest=/var/www/html/
+    become: true    
