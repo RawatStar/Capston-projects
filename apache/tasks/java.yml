@@ -1,0 +1,4 @@
+---
+ - name: Installing java
+   apt: name=default-jre update_cache=yes state=latest
+   become: true
