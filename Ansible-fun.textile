@@ -1,0 +1,147 @@
+Ansible
+
+It is configration management tool
+
+Two types 
+Push bashed - Ansible - only when agent want to push change change will push - it is more controlled.
+
+Pull Bashed - Chef and puppet - agent automatically scanning the change pull chnage - it have no controls in script
+
+~~~~~~~~
+
+Ansible is only install on Linux machine but can manage windows machine.
+
+It is pytone bashed application
+
+So need pythone to install Ansible
+
+$ sudo apt update
+$ sudo apt install software-properties-common
+$ sudo add-apt-repository --yes --update ppa:ansible/ansible
+$ sudo apt install ansible
+
+~~~~~~~~~~~~~
+ansible architecture -
+
+    Playbook   -  Ansible Master  -             Slaves
+Admin                                 SSH & pythone
+    script        Invontaries Modules           hosts
+~~~~~~~~~~~~~
+
+
+ansible.cfg -- is default setting file in ansible to control ansible.
+
+ansible --version // tell u ansible.cfg file
+
+hosts file // define where u want to run playbook known as enventry.
+ In host file
+Grouped - makes group like DB server and etc
+Un Group- only IP address
+
+ansible all -m ping // use to test all the listed IP address in host file is reachable or not
+
+_______________
+
+Set password for ec2 instance for remote machine.
+
+ansible all -m ping --ask-pass
+
+There are two method to connect the remote server from ansible
+password authantication.
+other Is 
+Key pair authantication -
+
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+for key pair authantication you need .pem file in ur ansible server
+scp -i ubuntu-key-aws.pem ubuntu-key-aws.pem ubuntu@54.86.130.104:/tmp // importing key from local to remote
+
+root@ you can do this by ssh-keygen in .ssh/ directory and copy is_rda.pub and paste content in remote .ssh/authorized_keys
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+cp to
+
+@ /etc/ansible/ location
+
+For key pair authantication edit hosts file 
+
+<IP> ansible_user=ec2-user ansible_ssh_private_key_file=/etc/ansible/ubuntu-key-aws.pem
+
+or group
+[production]
+slave1 ansible_ssh_host=34.224.18.3
+ansible all -m ping  // to check connection no need to --ask-pass 
+
+~~~~~~~~~~~~~Ansible Playbook~~~~~~~~
+
+Playbook is number of play
+Play contains tasks
+It follow yaml syntax
+
+#Target section - remote machine
+
+#Variable section - variables
+
+#Task sections - Main section, all the tasks
+
+#Handler section - Triggered tasks
+
+---  // this show begning of yaml file
+
+- hosts: all #execute on all machine from enventry file 
+  become: true #want to become different user
+  become_method: sudo # which user : sudo user
+  name: Play 1
+  vars:
+    package1: "httpd"
+    package2: "git"
+    package3: "java"
+
+
+  Tasks:
+  - name: Installing {{package1}}
+    yum: name={{package1}} state=latest/present/absent #absent means uninstall and lastest & present r same
+  - name: Installing{{package2}}
+    yum: name={{package2}} state=latest
+  - name: Installing {{package3}}
+    yum: name={{package3}} state=latest
+
+    #yum for aws linux or centos or apt for ubuntu
+
+
+ansible-playbook <*.yaml> // to run play-book 
+______________________________________________________________
+
+ad-hoc command -One time Command
+Playbook- script - YAML 
+
+
+
+
+
+~~~~~ansible Role ~~~~~~~~~~~~~~~
+It is structured and well managed to handle complexity 
+It breakdown playbook in sperate seprate file 
+
+
+Structure of ansible Role 
+
+default: Store data about the roel, also store default variables
+
+Files: Store file that need to push to the remote machine
+
+Handler: Tasks that get Triggered from some action.
+
+Meta: Info about author, supported platform and dependencies.
+
+Task: contains main list of the task to be execute by the role.
+
+Template: Contains templates which can be deployed via controlled
+
+Vars: Store variables with higher priority than default variables difficult to override
+
+
+Creating ansible role 
+
+ansible-galaxy init <role-name>
+
+* Remember that ansible role should be written inside /etc/ansible/roles/ 
